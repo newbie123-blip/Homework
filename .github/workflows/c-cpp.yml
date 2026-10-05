@@ -5,16 +5,21 @@ on:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Compile and Run
+
+    - name: Build and Run Homework 1-1
       run: |
-        g++ -Wall -std=c++17 src/*.cpp -o main
-        ./main
+        g++ -Wall -std=c++17 homework1-1/src/*.cpp -o homework1-1_main
+        ./homework1-1_main
+
+    - name: Build and Run Homework 1-2
+      run: |
+        g++ -Wall -std=c++17 homework1-2/src/*.cpp -o homework1-2_main
+        ./homework1-2_main
