@@ -14,7 +14,7 @@
 2. 如果 m>0 && n==0 回傳 A(m-1,1)
 3. 如果 m>0 && n>0 回傳 A(m-1, A(m,n-1))
 
-## 程式實作 
+## 遞迴程式實作 
 
 ```cpp
 #include<iostream>
@@ -35,11 +35,74 @@ cout<<AA(x,y)<<"\n";
 return 0;
 }
 ```
+## 非遞迴程式實作 
 
+```cpp
+#include <iostream>
+#include <string>
+#include <stack>
+
+using namespace std;
+
+class Solution {
+public:
+    bool isValid(string s) {
+        stack<char> sta;
+        
+        for (int i = 0; i < s.size(); i++) {
+            if (s[i] == '(' || s[i] == '[' || s[i] == '{') {
+                sta.push(s[i]);
+            } else if (sta.empty()) {
+                return false;
+            } else if (s[i] == ')') {
+                if (sta.top() == '(') {
+                    sta.pop();
+                } else {
+                    return false;
+                }
+            } else if (s[i] == '}') {
+                if (sta.top() == '{') {
+                    sta.pop();
+                } else {
+                    return false;
+                }
+            } else if (s[i] == ']') {
+                if (sta.top() == '[') {
+                    sta.pop();
+                } else {
+                    return false;
+                }
+            }
+        }
+        
+        if (sta.empty()) return true;
+        else return false;
+    }
+};
+
+int main() {
+    Solution solution;
+    string arr;
+    while (cin >> arr) {
+        if (solution.isValid(arr)) {
+            cout << "結果：true (合法)" << "\n";
+        } else {
+            cout << "結果：false (不合法)" << "\n";
+        }
+    }
+
+    return 0;
+}
+```
 ## 效能分析
-
+遞迴效能分析:
 1. 時間複雜度：程式的時間複雜度為 $O(A(m, n))$ 指數成長。
 2. 空間複雜度：空間複雜度為 $O(A(m, n))$。
+
+非遞迴效能分析:
+1. 時間複雜度：程式的時間複雜度為 $O(N)$ 指數成長。
+2. 空間複雜度：空間複雜度為 $O(N)$。
+
 
 ## 測試與驗證
 
