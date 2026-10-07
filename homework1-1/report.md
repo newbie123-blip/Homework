@@ -14,7 +14,7 @@
 2. 如果 m>0 && n==0 回傳 A(m-1,1)
 3. 如果 m>0 && n>0 回傳 A(m-1, A(m,n-1))
 
-## 遞迴程式實作 
+## 程式實作 
 
 ```cpp
 #include<iostream>
@@ -35,7 +35,7 @@ cout<<AA(x,y)<<"\n";
 return 0;
 }
 ```
-## 遞迴程式實作 
+## 程式實作 
 (非遞迴)
 ```cpp
 #include <iostream>
