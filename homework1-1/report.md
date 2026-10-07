@@ -35,8 +35,8 @@ cout<<AA(x,y)<<"\n";
 return 0;
 }
 ```
-## 非遞迴程式實作 
-
+## 遞迴程式實作 
+(非遞迴)
 ```cpp
 #include <iostream>
 #include <string>
