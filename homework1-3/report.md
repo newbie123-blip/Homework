@@ -224,7 +224,7 @@ int main() {
 2. 空間複雜度：空間複雜度為 $O(N+M)$。
 有使用暫存用的類別。
 
-##程式測試
+## 程式測試
 ```shell
 $ g++ main.cpp --std=c++17 -o main.exe
 $ .\main.exe
