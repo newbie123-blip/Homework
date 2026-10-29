@@ -21,6 +21,7 @@ private:
     Term* termarray;
     int capacity;
     int terms;
+    bool check = true;
 public:
     polynomial() {
         capacity = 1;
@@ -37,6 +38,14 @@ public:
         }
     }
 
+    void setcheck(bool x) {
+        check = x;
+    }
+
+    bool checkk() {
+        return check;
+    }
+
     polynomial add(polynomial p) {
         polynomial test;
         for (int i = 0; i < terms; i++) {
@@ -44,13 +53,17 @@ public:
             for (int j = 0; j < p.terms; j++) {
                 if (termarray[i].exp == p.termarray[j].exp) {                       //以陣列1為主指數相同相加
                     flag = 1;
-                    test.newterm(termarray[i].coef + p.termarray[j].coef,
-                        termarray[i].exp);
+                    if (termarray[i].coef + p.termarray[j].coef != 0) {                 //係數=0不放進陣列
+                        test.newterm(termarray[i].coef + p.termarray[j].coef,
+                            termarray[i].exp);
+                    }
                     break;
                 }
             }
             if (flag != 1) {
-                test.newterm(termarray[i].coef, termarray[i].exp);
+                if (termarray[i].coef != 0) {
+                    test.newterm(termarray[i].coef, termarray[i].exp);
+                }                                                          //如果沒發生加法直接把數字加進去
             }
         }
         for (int i = 0; i < p.terms; i++) {
@@ -62,7 +75,9 @@ public:
                 }
             }
             if (flag != 1) {
-                test.newterm(p.termarray[i].coef, p.termarray[i].exp);
+                if (p.termarray[i].coef != 0) {
+                    test.newterm(termarray[i].coef, termarray[i].exp);
+                }
             }
         }
         sort(test.termarray, test.termarray + test.terms, [](Term a, Term b) {
@@ -131,7 +146,8 @@ istream& operator>>(istream& input, polynomial& p) {
     double coef;
     int exp;
     char temp;
-    bool flag = true;                                        //判斷是不是負的
+    bool flag = true,check=true;                        //判斷是不是負的
+    p.terms = 0;                                        
     while (1) {
         input >> coef;                                        //先讀取第一個數字coef
         if (!flag) {
@@ -145,6 +161,11 @@ istream& operator>>(istream& input, polynomial& p) {
         }
         input.ignore();                                         //跳過^符號
         input >> exp;
+        if (exp < 0) {
+            cout << "錯誤指數不能為負"<<"\n";
+            p.setcheck(false);
+            break;
+        }
         p.newterm(coef, exp);                                    //前面都沒問題放進陣列
         input.get(temp);                                         //讀下一個是否為負
         if (temp == '\n')break;
@@ -166,14 +187,24 @@ ostream& operator<<(ostream& output, const polynomial& p) {
             }
             continue;
         }
-        if (i == 0) {
-            output << p.termarray[i].coef << "x^" << p.termarray[i].exp;
-        }
-        else if (p.termarray[i].coef < 0) {
-            output << p.termarray[i].coef << "x^" << p.termarray[i].exp;              //負的正常顯示
+        if (p.termarray[i].exp == 1) {
+            if (p.termarray[i].coef < 0) {
+                output << p.termarray[i].coef << "x" << p.termarray[i].exp;              //負的正常顯示
+            }
+            else {
+                output << "+" << p.termarray[i].coef << "x" << p.termarray[i].exp;         //正的多顯示一個"+"
+            }
         }
         else {
-            output << "+" << p.termarray[i].coef << "x^" << p.termarray[i].exp;         //正的多顯示一個"+"
+            if (i == 0) {
+                output << p.termarray[i].coef << "x^" << p.termarray[i].exp;
+            }
+            else if (p.termarray[i].coef < 0) {
+                output << p.termarray[i].coef << "x^" << p.termarray[i].exp;              //負的正常顯示
+            }
+            else {
+                output << "+" << p.termarray[i].coef << "x^" << p.termarray[i].exp;         //正的多顯示一個"+"
+            }
         }
     }
     return output;
@@ -181,12 +212,64 @@ ostream& operator<<(ostream& output, const polynomial& p) {
 int main() {
     polynomial p1;
     polynomial p2;
-
-    while (cin >> p1 >> p2) {
-        cout << "(" << p1 << ") + (" << p2 << ") = ";
-        cout << p1.add(p2) << "\n";
-        cout << "(" << p1 << ") X (" << p2 << ") = ";
-        cout << p1.mult(p2) << "\n";
+    int x;
+    cout << "輸入兩個多項式" << "\n";
+    cout << "\n";
+    cout << "A(x):";
+    cin >> p1;
+    if (!p1.checkk()) {
+        return 0;
     }
+    cout << "\n";
+    cout << "B(x):";
+    cin >> p2;
+    if (!p2.checkk()) {
+        return 0;
+    }
+    cout << "\n";
+        cout << "A(x) = " << p1;
+        cout << "B(x) = " << p2;
+        cout << "\n";
+        cout << "=======Polynomial 選單========" << "\n";
+        cout <<"1.顯示A、B"<<"\n";
+        cout <<"2.顯示A+B" << "\n";
+        cout << "3.顯示A*B" << "\n";
+        cout << "4.計算A(x)" << "\n";
+        cout << "5.計算B(x)" << "\n";
+        cout << "6.重新輸入 A" << "\n";
+        cout << "7.重新輸入 B" << "\n";
+        cout << "0.結束程式" << "\n";
+        cout << "選擇";
+        while (cin >> x,x) {
+            cout << "你選擇 : " << x<<"\n";
+            if(x==1){
+                cout << "A(x) = " << p1;
+                cout << "B(x) = " << p2;
+            }
+            else if (x == 2) {
+                cout << p1.add(p2)<<"\n";
+            }
+            else if (x == 3) {
+                cout << p1.mult(p2) << "\n";
+            }
+            else if (x == 4) {
+                cout << "輸入A(x)的值 x:";
+                cin >> x;
+                cout <<"A的sum值=" << p1.Eval(x) << "\n";
+            }
+            else if (x == 5) {
+                cout << "輸入B(x)的值 x:";
+                cin >> x;
+                cout << "A的sum值=" << p2.Eval(x) << "\n";
+            }
+            else if (x == 6) {
+                cout << "重新輸入A(x)=";
+                cin >> p1;
+            }
+            else if (x == 7) {
+                cout << "重新輸入B(x)=";
+                cin >> p2;
+            }
+        }
     return 0;
 }
