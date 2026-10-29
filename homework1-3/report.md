@@ -50,6 +50,7 @@ private:
     Term* termarray;
     int capacity;
     int terms;
+    bool check = true;
 public:
     polynomial() {
         capacity = 1;
@@ -66,6 +67,14 @@ public:
         }
     }
 
+    void setcheck(bool x) {
+        check = x;
+    }
+
+    bool checkk() {
+        return check;
+    }
+
     polynomial add(polynomial p) {
         polynomial test;
         for (int i = 0; i < terms; i++) {
@@ -73,13 +82,17 @@ public:
             for (int j = 0; j < p.terms; j++) {
                 if (termarray[i].exp == p.termarray[j].exp) {                       //以陣列1為主指數相同相加
                     flag = 1;
-                    test.newterm(termarray[i].coef + p.termarray[j].coef,
-                        termarray[i].exp);
+                    if (termarray[i].coef + p.termarray[j].coef != 0) {                 //係數=0不放進陣列
+                        test.newterm(termarray[i].coef + p.termarray[j].coef,
+                            termarray[i].exp);
+                    }
                     break;
                 }
             }
             if (flag != 1) {
-                test.newterm(termarray[i].coef, termarray[i].exp);
+                if (termarray[i].coef != 0) {
+                    test.newterm(termarray[i].coef, termarray[i].exp);
+                }                                                          //如果沒發生加法直接把數字加進去
             }
         }
         for (int i = 0; i < p.terms; i++) {
@@ -91,7 +104,9 @@ public:
                 }
             }
             if (flag != 1) {
-                test.newterm(p.termarray[i].coef, p.termarray[i].exp);
+                if (p.termarray[i].coef != 0) {
+                    test.newterm(termarray[i].coef, termarray[i].exp);
+                }
             }
         }
         sort(test.termarray, test.termarray + test.terms, [](Term a, Term b) {
@@ -100,7 +115,7 @@ public:
     }
 
     polynomial mult(polynomial p) {
-        polynomial a, b,c;
+        polynomial a, b, c;
         for (int i = 0; i < terms; i++) {
             for (int j = 0; j < p.terms; j++) {
                 a.newterm(termarray[i].coef * p.termarray[j].coef,
@@ -109,17 +124,17 @@ public:
         }
         if (a.terms == 0) return a;
 
-        for (int i = 0;i<a.terms-1;i++) {
-            for (int j = i;j<a.terms-1;j++) {
+        for (int i = 0; i < a.terms - 1; i++) {
+            for (int j = i; j < a.terms - 1; j++) {
                 Term d;
                 if (a.termarray[i].exp < a.termarray[j].exp) {
-                    d=a.termarray[j];                                 //用指數進行泡沫排序
+                    d = a.termarray[j];                                 //用指數進行泡沫排序
                     a.termarray[j] = a.termarray[i];
                     a.termarray[i] = d;
                 }
             }
         }
-        
+
         b.newterm(a.termarray[0].coef, a.termarray[0].exp);
         for (int i = 1; i < a.terms; i++) {
             if (a.termarray[i].exp == b.termarray[b.terms - 1].exp) {
@@ -160,21 +175,36 @@ istream& operator>>(istream& input, polynomial& p) {
     double coef;
     int exp;
     char temp;
-    bool flag = true;                                        //判斷是不是負的
+    bool flag = true, check = true;                        //判斷是不是負的
+    p.terms = 0;
     while (1) {
-        input >> coef;                                        //先讀取第一個數字coef
+        input >> coef;
+                                                       //先讀取第一個數字coef
         if (!flag) {
             coef *= -1;
             flag = true;                                     //如果是前面是"-"號把讀入的數值*-1
-        }                                                      
+        }
+        if (coef == 0) {
+            cout << "錯誤係數不能為0" << "\n";
+            p.setcheck(false);
+            break;
+        }
         input.get(temp);                                      //跳過x
         if (temp == '\n') {                                    //下一位是換行結束迴圈
             p.newterm(coef, 0);
             break;
         }
-        input.ignore();                                         //跳過^符號
+        char temp2;
+        input.ignore();    //跳過^符號
         input >> exp;
-        p.newterm(coef, exp);                                    //前面都沒問題放進陣列
+        if (exp < 0) {
+            cout << "錯誤指數不能為負" << "\n";
+            p.setcheck(false);
+            break;
+        }
+        if (coef != 0) {
+            p.newterm(coef, exp);
+        }
         input.get(temp);                                         //讀下一個是否為負
         if (temp == '\n')break;
         else if (temp == '-')flag = false;
@@ -183,7 +213,7 @@ istream& operator>>(istream& input, polynomial& p) {
 }
 ostream& operator<<(ostream& output, const polynomial& p) {
     for (int i = 0; i < p.terms; i++) {
-        if (p.termarray[i].exp == 0){                                //第一位是常數的情況
+        if (p.termarray[i].exp == 0) {                                //第一位是常數的情況
             if (i == 0) {
                 output << p.termarray[i].coef;                      //第一位不輸出+號
             }
@@ -195,14 +225,24 @@ ostream& operator<<(ostream& output, const polynomial& p) {
             }
             continue;
         }
-        if (i == 0) {
-            output << p.termarray[i].coef << "x^" << p.termarray[i].exp;
-        }
-        else if (p.termarray[i].coef < 0) {
-            output << p.termarray[i].coef << "x^" << p.termarray[i].exp;              //負的正常顯示
+        if (p.termarray[i].exp == 1) {
+            if (p.termarray[i].coef < 0) {
+                output << p.termarray[i].coef << "x" << p.termarray[i].exp;              //負的正常顯示
+            }
+            else {
+                output << "+" << p.termarray[i].coef << "x";         //正的多顯示一個"+"
+            }
         }
         else {
-            output << "+" << p.termarray[i].coef << "x^" << p.termarray[i].exp;         //正的多顯示一個"+"
+            if (i == 0) {
+                output << p.termarray[i].coef << "x^" << p.termarray[i].exp;
+            }
+            else if (p.termarray[i].coef < 0) {
+                output << p.termarray[i].coef << "x^" << p.termarray[i].exp;              //負的正常顯示
+            }
+            else {
+                output << "+" << p.termarray[i].coef << "x^" << p.termarray[i].exp;         //正的多顯示一個"+"
+            }
         }
     }
     return output;
@@ -210,12 +250,66 @@ ostream& operator<<(ostream& output, const polynomial& p) {
 int main() {
     polynomial p1;
     polynomial p2;
-
-    while (cin >> p1 >> p2) {
-        cout << "(" << p1 << ") + (" << p2 << ") = ";
-        cout << p1.add(p2) << "\n";
-        cout << "(" << p1 << ") X (" << p2 << ") = ";
-        cout << p1.mult(p2) << "\n";
+    int x;
+    cout << "輸入兩個多項式" << "\n";
+    cout << "\n";
+    cout << "A(x):";
+    cin >> p1;
+    if (!p1.checkk()) {
+        return 0;
+    }
+    cout << "\n";
+    cout << "B(x):";
+    cin >> p2;
+    if (!p2.checkk()) {
+        return 0;
+    }
+    cout << "\n";
+    cout << "A(x) = " << p1;
+    cout << "\n";
+    cout << "B(x) = " << p2;
+    cout << "\n";
+    cout << "=======Polynomial 選單========" << "\n";
+    cout << "1.顯示A、B" << "\n";
+    cout << "2.顯示A+B" << "\n";
+    cout << "3.顯示A*B" << "\n";
+    cout << "4.計算A(x)" << "\n";
+    cout << "5.計算B(x)" << "\n";
+    cout << "6.重新輸入 A" << "\n";
+    cout << "7.重新輸入 B" << "\n";
+    cout << "0.結束程式" << "\n";
+    cout << "選擇";
+    while (cin >> x, x) {
+        cout << "你選擇 : " << x << "\n";
+        if (x == 1) {
+            cout << "A(x) = " << p1;
+            cout << "\n";
+            cout << "B(x) = " << p2;
+        }
+        else if (x == 2) {
+            cout << p1.add(p2) << "\n";
+        }
+        else if (x == 3) {
+            cout << p1.mult(p2) << "\n";
+        }
+        else if (x == 4) {
+            cout << "輸入A(x)的值 x:";
+            cin >> x;
+            cout << "A的sum值=" << p1.Eval(x) << "\n";
+        }
+        else if (x == 5) {
+            cout << "輸入B(x)的值 x:";
+            cin >> x;
+            cout << "A的sum值=" << p2.Eval(x) << "\n";
+        }
+        else if (x == 6) {
+            cout << "重新輸入A(x)=";
+            cin >> p1;
+        }
+        else if (x == 7) {
+            cout << "重新輸入B(x)=";
+            cin >> p2;
+        }
     }
     return 0;
 }
