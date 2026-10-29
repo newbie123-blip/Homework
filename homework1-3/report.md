@@ -109,8 +109,17 @@ public:
                 }
             }
         }
-        sort(test.termarray, test.termarray + test.terms, [](Term a, Term b) {
-            return a.exp > b.exp; });
+        for (int i = 0; i < test.terms - 1; i++) {
+            for (int j = i; j < test.terms - 1; j++) {
+                Term d;
+                if (test.termarray[i].exp < test.termarray[j].exp) {
+                    d = test.termarray[j];
+                    test.termarray[j] = test.termarray[i];
+                    test.termarray[i] = d;
+                }
+            }
+        }
+        return test;
         return test;
     }
 
